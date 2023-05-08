@@ -1,0 +1,2 @@
+class Kiind < ApplicationRecord
+end
