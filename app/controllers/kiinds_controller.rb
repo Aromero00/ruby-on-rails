@@ -1,10 +1,13 @@
 class KiindsController < ApplicationController
   before_action :set_kiind, only: %i[ show update destroy ]
-include ActionController::HttpAuthentication::Basic::ControllerMethods 
- http_basic_authenticate_with name: "antonio", password: "123456"
+#include ActionController::HttpAuthentication::Basic::ControllerMethods 
+ #http_basic_authenticate_with name: "antonio", password: "123456"
 
-
+ include ActionController::HttpAuthentication::Digest::ControllerMethods
+# jack:application:secret
+  USERS = {"antonio" => OpenSSL::Digest::MD5.hexdigest(["antonio","application","secret"].join(":"))}  #ha1 digest password
   # GET /kiinds
+  before_action :authenticate
   def index
     @kiinds = Kiind.all
 
@@ -50,5 +53,11 @@ include ActionController::HttpAuthentication::Basic::ControllerMethods
     # Only allow a list of trusted parameters through.
     def kiind_params
       params.require(:kiind).permit(:description)
+    end
+
+    def authenticate
+      authenticate_or_request_with_http_digest("application") do |username|
+        USERS[username]
+      end
     end
 end
